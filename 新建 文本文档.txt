@@ -1,0 +1,774 @@
+
+
+
+
+1. 充电器测试传感器、按键、指示灯以及蓝牙的配置、APP通信测试
+2. 遥控器MCU代码功能整理成文件
+3. 编写充电器OTA升级
+
+
+
+
+1. 充电器继续对接APP
+2. 遥控器外设测试
+3. 进行遥控器功能功能
+
+
+
+
+
+
+//直接把APP关掉
+
+校准说明：
+
+
+
+
+点击：  摇杆校准    发送  进入摇杆校准界面     0x07
+    此时：MCU采集AD数据发送给APP
+   
+
+点击：  开始校准    发送  中立点校准请求   MCU开始计时（30秒）   0x0E
+    此时：
+	    1.MCU采集AD数据发送给APP
+        2.MCU记录当前采集到的AD数据，当作中位点
+
+
+
+点击：  点击最大量程 发送 校准最大量程请求          0x0F
+
+点击：  摇杆校准结果                                       0x10
+     此时：APP发送自己的校准结果给MCU，如果接收的是1，MCU需要二次校验，应答给APP
+ 
+
+
+
+
+
+
+
+
+
+
+1. 遥控器外设测试
+2. 完成充电器与两块金威源模块通信、电池的通信
+
+
+
+
+
+
+
+
+
+
+1. 优遥控器通道设置、校准功能；测试AD按键
+2. 测试遥控器与APP交互
+3. 测试充电器给电池充电
+
+
+
+
+
+
+
+			if(channelx[0].direction==FORWARD)//正方向
+			{
+				adcValue = adc_value[RIGHTX] - jsParam->rightx.mid;
+				if(adcValue>=0)//在左边
+				{
+					channel1_4->roll = channelx[0].mid - (int16_t)(adcValue/rightxl);
+					if(channel1_4->roll < channelx[0].range_neg)  channel1_4->roll=channelx[0].range_neg;  
+				}else
+				{
+					channel1_4->roll = (int16_t)(channelx[0].mid - (adcValue/rightxr));
+					if(channel1_4->roll > channelx[0].range_pos)  channel1_4->roll=channelx[0].range_pos; 
+				}
+			}else if(channelx[0].direction==INVERSION)
+			{
+				adcValue = adc_value[RIGHTX] - jsParam->rightx.mid;
+				if(adcValue>=0)//在左边
+				{
+					channel1_4->roll = channelx[0].mid + (int16_t)(adcValue/rightxl);
+					if(channel1_4->roll > channelx[0].range_neg)  channel1_4->roll=channelx[0].range_neg;  
+				}else
+				{
+					channel1_4->roll = channelx[0].mid + (int16_t)(adcValue/rightxr);
+					if(channel1_4->roll < channelx[0].range_pos)  channel1_4->roll=channelx[0].range_pos; 
+				}					
+			}
+			
+			
+			
+			
+			
+1. 优遥控器通道设置、校准功能；测试AD按键（100%）
+2. 测试遥控器与APP交互 （0%）
+3. 测试充电器给电池充电（80%）			
+
+
+
+1. 完成充电器给电池充电
+2. 遥控器AT代码、充电设置编写
+3. 测试遥控器与APP交互
+
+
+
+
+10101001
+
+0101 0101
+
+
+
+stty -F /dev/ttyS1 ispeed 100000 ospeed 100000 cs8 parenb cstopb
+
+
+
+经过测试 S0 应该是调试串口，因为修改为其他波特率之后，按键输入卡死      
+
+
+test_bb_cfg -p auto:15-25,15-25
+
+
+
+
+
+
+现象：
+
+ 1. 配置充电器限制功率4500W、59.85V、150A
+
+
+
+
+
+
+
+
+
+
+1.协助完成遥控端和飞控端图传模块的对频工作
+2.完成调试SBUS的摇杆通道，上机测试
+3.宗申5.0发电机带载测试
+4.中继器对频功能测试和问题查找
+
+
+
+
+
+
+1. 遥控器与APP通信的协议优化、校准方案修改 
+2. 进行中继器驱动和的应用的编写
+
+
+
+
+
+
+
+
+
+
+
+总结：
+  1. 采样充电器小电流数据、配合供应商进行校准测试，寄出充电器
+  2. 配合进行图传模块对频、刷系统镜像、数传测试
+  3. 初次优化遥控器MCU程序，修改与APP通信协议，并依照协议完成代码编写，待检验
+
+
+计划： 
+  1. 检验充电器小电流控制
+  2. 配合移远进行电量显示
+  3. 按键检验遥控校验、正反向控制、摇杆类型等功能
+  4. 和APP对接测试
+  
+  
+ 
+ 
+ while()
+ {
+	delay_ms(10);
+	send_data;
+ }
+ 
+ 
+ 
+ 
+ 6：39：5        
+ 
+ 
+ 6：29：14
+ 1393     32%
+ 
+ 
+ 
+ 10分钟    32%~100%
+ 
+ 
+ 
+ 
+ 
+本周工作内容：
+
+1.   中继第一版硬件完成配对功能，单片机需配合高工的工作
+
+2.   持续关注SBUS偏移问题   ： 手自动控制测试正常  
+
+3.   优化风机飞速控制       ：  
+
+4.   遥控器对接移远测试电量显示准确性    
+
+5.   对接APP测试摇杆校准等功能
+
+
+
+
+
+
+
+1.  开机时，电量显示50%，过一段时间才有变化
+ 
+2.  上周五测试，3秒发一次电量++， 显示也会步进随着增加，只是显示快了1%        
+3.  目前测试，3秒发一次，  显示不会步进随着增加，跳着显示  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+完成情况：
+   1.遥控器数传测试
+   2.充电器小电流问题检验
+   3.3.5和5.0充电器充电时间对比
+   4.海拔功能验证
+   5.遥控器电量显示测试（50%）
+   
+
+计划： 
+   1.遥控器手/自动试飞情况跟进
+   2.遥控器电量显示测试
+   3.遥控器对接APP测试摇杆校准功能
+   
+   
+   
+   
+1.  遥控器手/自动试飞情况跟进，优化风机控制、SBUS传输  
+2.  遥控器电量显示测试（进行中）
+3.  中继充电管理代码编写测试                      //不配置就没办法充电
+
+
+
+
+
+
+
+1.  发电机测试
+2.  中继对频跟进
+3.  遥控器APP对接、电量显示跟进
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+/*
+
+  串口助手10ms发送数据并不是真的10Ms，存在问题   串口工具要定时清空数据，不然显示接收的数据不完整
+  
+  USB转TTL均正常 ：  PC--->PC数据均正常
+  
+  
+  验证MCU发送的数据不是连续的，有间隔时间
+   
+*/ 
+ 
+ 
+ 
+1. 5.0外场测试充电器、遥控器图传 
+2. 遥控器进行摇杆校准（20%）
+
+
+
+
+
+1. 遥控器电量显示测试
+2. 协助高工进行中继对频、透传工作
+3. 遥控器进行摇杆校准
+
+
+
+这次贴片还是老的，新的还没定下来
+
+
+
+
+
+
+1. 遥控器进行摇杆校准（80%）
+2. 遥控器MCU对接APP测试通道设置以及其余协议 确认/返回、打点、FPV、握手包、摇杆类型设置（60%）
+3. 进行协助高工进行中继对频、透传工作，目前测试直接透传实现    
+
+
+1. 遥控器进行摇杆校准、通道设置优化
+2. 进行协助高工进行中继对频、透传工作
+3. 遥控器电量显示
+
+
+
+
+
+
+1. 充电器配合电池进行异常情况的测试
+2. 遥控和飞控的直连对频测试 
+3. 编写摇杆代替拨轮实现映射,待验证（50%）
+
+
+
+1. 编写充电器测试电池整机生产测试Demo，进行测试
+2. 对接APP完善摇杆校准、通道设置、拨轮验证的功能
+3. 对频测试及对频状态控制编写
+
+
+
+
+对接遇到的问题记录：
+
+
+   校准：
+      大小端问题、正负号问题、重发或掉包（流水号）问题（APP接收错误）
+      超时 
+
+
+
+       25          
+MAGIC  LEN  DATA   CRC
+  
+
+XX XX  ............00 00\N
+
+
+
+裸板：  
+   大红线应该是：P301D的TXD，连接调试串口的RXD
+   下面的粉线：  P301D的RXD，连接调试串口的TXD
+   下面分开的粉线： SBUS数据
+   
+   
+   月度绩效计划以及月度总结完成情况
+
+
+/*
+  1. 002飞机对频 
+  2. 遥控器摇杆采样修改、10位精度、新摇杆验证
+  3. SBUS协议封装，配合进行丢包、粘包的统计
+  4. 
+*/
+
+
+
+
+/*
+  1. 编写充电器接口测试Demo
+  2. 
+
+*/
+
+
+
+1. 中继功能梳理，新中继板基本功能编写
+2. 实现遥控、中继、飞控对频，以及遥控状态灯逻辑
+3. 充电器测试板和被测板demo编写，并测试 
+
+
+2023/0828：
+
+    1. 第一件事情： 完成ADC采样循环50次，求平均值    完成，待测试
+	
+	2. SBUS封装协议，发送给P301D                        
+
+    3. 编写	发送和处理P301D的代码
+	
+	4. SBUS测试
+	
+	
+2023/0829：
+    
+    1. 遥控新摇杆  纠正  和测试、 SBUS测试 	
+	
+	2. 
+	
+	
+	
+2023/0830：
+    1. 测试	
+	
+	2. 充电器测试板Demo和被测板Demo
+	
+	   
+测试板： 
+    1. 初始化：  
+	    一个灯  //表明测试板还是运行中
+		485串口 //用于和被测板子的485通信、透传自身debug串口  
+	    debug串口
+		CAN接口 
+	   
+	   
+	   
+	
+	
+	
+	
+	
+	
+	
+	
+	
+//			if(channelx[2].direction==FORWARD)//油门  对应  通道3  左摇杆Y
+//			{
+//				adcValue = getAdcValue(LEFTY) - jsParam->lefty.mid;
+//				if(adcValue>=0)
+//				{
+//					channel1_4->thrust = (int16_t)(adcValue/leftyr) + channelx[2].mid;
+//					if(channel1_4->thrust > (channelx[2].range_pos-SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_pos;  
+//				}else
+//				{
+//					channel1_4->thrust = (int16_t)(adcValue/leftyl) + channelx[2].mid;
+//					if(channel1_4->thrust < (channelx[2].range_neg+SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_neg; 
+//				}
+//			}else if(channelx[2].direction==INVERSION)
+//			{
+//				adcValue = getAdcValue(LEFTY) - jsParam->lefty.mid;
+//				if(adcValue>=0)
+//				{
+//					channel1_4->thrust = channelx[2].mid - (int16_t)(adcValue/leftyr);
+//					if(channel1_4->thrust < (channelx[2].range_neg+SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_neg;  
+//				}else
+//				{
+//					channel1_4->thrust = channelx[2].mid - (int16_t)(adcValue/leftyl);
+//					if(channel1_4->thrust > (channelx[2].range_pos-SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_pos; 
+//				}					
+//			}
+
+			if(channelx[2].direction==FORWARD)//油门  对应  通道3  左摇杆Y
+			{
+				adcValue = getAdcValue(LEFTY) - jsParam->lefty.mid;
+				if(adcValue>=0) //向下
+				{
+					channel1_4->thrust = channelx[2].mid - (int16_t)(adcValue/leftyl);    
+					if(channel1_4->thrust < (channelx[2].range_neg+SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_neg;  
+				}else     //向上
+				{
+					channel1_4->thrust = channelx[2].mid - (int16_t)(adcValue/leftyr);
+					if(channel1_4->thrust > (channelx[2].range_pos-SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_pos; 
+				}
+			}else if(channelx[2].direction==INVERSION)
+			{
+				adcValue = getAdcValue(LEFTY) - jsParam->lefty.mid;
+				if(adcValue>=0)  //向下
+				{
+					channel1_4->thrust = channelx[2].mid + (int16_t)(adcValue/leftyl);
+					if(channel1_4->thrust > (channelx[2].range_pos-SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_pos;  
+				}else
+				{
+					channel1_4->thrust = channelx[2].mid + (int16_t)(adcValue/leftyr);
+					if(channel1_4->thrust < (channelx[2].range_neg+SBUS_DIR_MID))  channel1_4->thrust=channelx[2].range_neg; 
+				}					
+			}	
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+  1. 新中继板底层配置，参考基站程序
+  2. 对频测试和流程总结
+  
+  
+  
+  1. 中继器基本功能、实现透传
+  
+
+
+1. 创建完文件之后，重启 中继、遥控之后，  中继debug还在打印 ，重要、遥控再次重启了一次之后，中继才停止打印
+2. 有时候执行 AT+FLAG=TOUCH\r\n  会返回 ERROR
+  
+			
+			
+			
+			
+			
+			
+			
+
+
+直连对频流程：
+遥控器与飞机
+
+
+
+遥控器MCU：
+
+ 1. 删除 trinode文件
+    AT+FLAG=CLEAN\r\n    //OK  ERROR
+    
+ 2. 重启 遥控P301D 
+    AT+REBOOT\r\n        //不会收到应答     10
+
+ 3. while(1)  AT\r\n
+
+ 4. AT+PAIR=\"AIR\"\r\n  //启动直连对频10秒              15
+ 
+
+飞控：
+ 1. 按下按键： 直接触发对频10秒                          30
+   
+
+
+
+
+中继对频：
+
+
+遥控器：
+ 1. 删除 trinode文件
+    AT+FLAG=CLEAN\r\n    //OK  ERROR
+ 2. 重启 遥控P301D 
+    AT+REBOOT\r\n        //不会收到应答     10
+ 3. 执行 AT+PAIR="REPEATER"\r\n
+ 4. 创建文件
+ 5. 重启 
+
+
+
+中继器：
+1.    
+
+
+
+
+
+
+
+
+
+typedef struct p301dinfo 
+{
+	char devicetype[4];    //AP DEV 
+	char slotnumber[3];    //2 1 1+
+	char slot1frestate[8]; //DEFAULT|PAIRD|NONE
+	char slot1constate[8]; //CONN|DISCONN|NONE
+	char slot2frestate[8]; //DEFAULT|PAIRD|NONE
+	char slot2constate[8]; //CONN|DISCONN|NONE   
+	
+}P301DINFO;
+
+P301DINFO p301dinfo;
+
+
+
+void  getp301dstateValue(P301DINFO * p301dinfo, char *tmp)
+{
+	char index = 0;
+	char *res,*ptr = tmp;
+    while(1)
+	{
+		if( *ptr != ',')
+		{
+			ptr++;	
+		}else
+		{
+			index++; 
+			switch(index)
+			{
+				case 1: 										   
+				   memcpy(p301dinfo.devicetype,tmp,(ptr-tmp));
+				break;									    
+				case 2:
+				   memcpy(p301dinfo.slotnumber,tmp,(ptr-tmp)); 
+				break;
+				case 3:
+				   res = strstr(tmp,":");   
+				   memcpy(p301dinfo.slot1frestate,tmp,(res-tmp)); 
+				   memcpy(p301dinfo.slot1constate,(res+1),(ptr-res-1));
+				break; 	
+				case 4:
+				   res = strstr(tmp,":");   
+				   memcpy(p301dinfo.slot2frestate,tmp,(res-tmp)); 
+				   memcpy(p301dinfo.slot2constate,(res+1),(ptr-res-1));  
+				break; 									  
+			}		
+			tmp = ptr+1;
+			ptr = tmp;
+			if(index==4) break;		
+		}
+	}
+}
+
+
+					do
+					{
+					   memset((uint8_t *)&UART4_Receive,0,sizeof(_RECEIVESTRUCT_A)); 
+					   u4_printf("%s","AT+CONN?\r\n");
+                  rt_thread_mdelay(600);
+                  res = strstr((char *)UART4_Receive.Buff, (char*)"\r\n+CONN="); 
+						if(res != NULL)
+						{
+							P301DINFO p301dinfo={0};													
+							res = res+strlen("\r\n+CONN=");
+							getp301dstateValue(&p301dinfo,res);
+							if(strcmp(p301dinfo.devicetype,"AP")==0 && strcmp(p301dinfo.slot1frestate,"PAIRD")==0 && strcmp(p301dinfo.slot1constate,"CONN")==0)
+							{
+								  //认为对频、连接都成功
+							}						
+						}
+					}while(timeout++ < 30);
+					
+					
+					
+					
+					
+//   DEV  2   PAIRED   DISCONN   NONE    NONE
+
+
+  测试步骤：
+    1. 完成遥控和飞机的直连对频
+    2. 触发遥控器中继对频，   中继器不管 
+	3. 查询结果是：
+          	DEV  2   PAIRED   DISCONN   NONE    NONE
+			
+			
+	个人看法：
+          应该收到的数据是： 	DEV  X   DEFAULT   DISCONN   NONE    NONE
+					
+					
+				
+				
+				
+1. 完成中继器灯语控制线程、按键控制线程				
+2. UM482驱动移植，模式切换功能编写，测试在线可获取GNGGA和#BESTPOSA数据，目前都是空数据
+3. 5个串口发送和接收处理     蓝牙AT测试 
+
+
+
+
+总结：
+    1. 完成中继器灯语控制线程、按键控制线程    
+    2. UM482驱动移植，模式切换功能编写，测试在线可获取GNGGA和#BESTPOSA数据，目前都是空数据
+    3. 5个串口发送和接收处理     蓝牙AT测试 
+
+
+
+计划：
+    
+	测试中继器已显现的功能、对接APP测试基站和测绘器功能 
+
+ 
+ 
+ 
+ 
+#BESTPOSA,COM1,0,98.0,FINE,2280,366194.000,293295,21,18;INSUFFICIENT_OBS,NONE,0.00000000000,0.00000000000,0.0000,17.2300,WGS84,0.0000,0.0000,0.0000,"",0.000,264.000,4,0,4,1,0,00,00,00*9a3c8778 
+
+
+#BESTPOSA,COM1,0,98.0,FINE,2280,366194.000,293295,21,18;
+
+INSUFFICIENT_OBS,    //第一个      sol status
+
+
+
+
+NONE,               //第二个        pos type
+
+
+0.00000000000,      //第三个          lat
+
+
+0.00000000000,      //第四个         lon
+
+
+0.0000,             //第五个         hgt    
+
+17.2300,            //第六个          undulation
+
+WGS84,              //第七个         datum id#       
+
+0.0000,             //第八个         lat σ
+
+0.0000,             //第九个         lon σ
+
+0.0000,             //第十个         hgt σ
+
+"",                 //第十一个       stn id 
+
+0.000,              //第十二个        diff_age
+
+264.000,            //第十三个       sol_age
+
+4,                  //    #SVs  跟踪的卫星数
+
+0,                  //#solnSVs  在解中使用的卫星数  
+
+4,
+
+1,
+
+0,
+
+00,
+
+00,
+
+00*9a3c8778 
+
+
+
+
+#BESTPOSA,COM1,0,98.0,FINE,2280,366805.000,79294,21,18;SOL_COMPUTED,SINGLE,31.33618812912,120.81114041021,-3.4871,8.9946,WGS84,4.6780,6.4347,13.0785,"",0.000,0.000,17,12,12,0,0,02,00,51*d72ae5f7
+$GNGGA,055307.00,3120.17128775,N,12048.66842461,E,1,12,1.3,-3.4871,M,8.9946,M,,*63
+
+
+
+
+
+
+
+
+
+
+
+1.测试灯语和按键、开关机、GPS模式切换等功能
+2.中继透传、基站RTCM上报、位置信息获取处理和上报
+
+
+
+
+
+
+
